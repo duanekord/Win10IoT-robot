@@ -1,0 +1,207 @@
+using Windows.Devices.Gpio;
+using Windows.UI.Core;
+
+namespace App3
+{
+    public sealed partial class MainPage : Page
+    {
+        #region -----Variable Assignments-----
+        private const int leftE_PIN = 25;
+        private const int left1_PIN = 12;
+        private const int left2_PIN = 16;
+        private const int rightE_PIN = 18;
+        private const int right1_PIN = 24;
+        private const int right2_PIN = 23;
+
+        private GpioPin leftE;
+        private GpioPin left1;
+        private GpioPin left2;
+        private GpioPin rightE;
+        private GpioPin right1;
+        private GpioPin right2;
+
+        GpioPinValue pinValueHigh = GpioPinValue.High;
+        GpioPinValue pinValueLow = GpioPinValue.Low;
+
+        #endregion
+        public MainPage()
+        {
+            InitGPIO();
+            this.InitializeComponent();
+            CoreWindow.GetForCurrentThread().KeyDown += Window_KeyDown;
+            CoreWindow.GetForCurrentThread().KeyUp += Window_KeyUp;
+        }
+
+        private void InitGPIO()
+        {
+            //Gets the default GPIO if there is only one
+            GpioController gpio = GpioController.GetDefault();
+
+
+            // Show an error if there is no GPIO controller
+            if (gpio == null)
+            {
+                leftE = null;
+                left1 = null;
+                left2 = null;
+                rightE = null;
+                right1 = null;
+                right2 = null;
+
+                return;
+            }
+
+            leftE = gpio.OpenPin(leftE_PIN);
+            left1 = gpio.OpenPin(left1_PIN);
+            left2 = gpio.OpenPin(left2_PIN);
+            rightE = gpio.OpenPin(rightE_PIN);
+            right1 = gpio.OpenPin(right1_PIN);
+            right2 = gpio.OpenPin(right2_PIN);
+
+            leftE.Write(pinValueHigh);
+            left1.Write(pinValueHigh);
+            left2.Write(pinValueHigh);
+            rightE.Write(pinValueHigh);
+            right1.Write(pinValueHigh);
+            right2.Write(pinValueHigh);
+
+            leftE.SetDriveMode(GpioPinDriveMode.Output);
+            left1.SetDriveMode(GpioPinDriveMode.Output);
+            left2.SetDriveMode(GpioPinDriveMode.Output);
+            rightE.SetDriveMode(GpioPinDriveMode.Output);
+            right1.SetDriveMode(GpioPinDriveMode.Output);
+            right2.SetDriveMode(GpioPinDriveMode.Output);
+
+        }
+
+        private void defaultPins()
+        {
+            leftE.Write(pinValueHigh);
+            left1.Write(pinValueHigh);
+            left2.Write(pinValueHigh);
+            rightE.Write(pinValueHigh);
+            right1.Write(pinValueHigh);
+            right2.Write(pinValueHigh);
+
+            leftE.SetDriveMode(GpioPinDriveMode.Output);
+            left1.SetDriveMode(GpioPinDriveMode.Output);
+            left2.SetDriveMode(GpioPinDriveMode.Output);
+            rightE.SetDriveMode(GpioPinDriveMode.Output);
+            right1.SetDriveMode(GpioPinDriveMode.Output);
+            right2.SetDriveMode(GpioPinDriveMode.Output);
+
+        }
+
+        private void forwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            carForward();
+        }
+
+        private void reverseButton_Click(object sender, RoutedEventArgs e)
+        {
+            carReverse();
+        }
+
+        private void stopButton_Click(object sender, RoutedEventArgs e)
+        {
+            carStop();
+        }
+
+        #region -----Car Movements-----
+        private void carForward()
+        {
+            defaultPins();
+            leftE.Write(pinValueHigh);
+            rightE.Write(pinValueHigh);
+            left1.Write(pinValueLow);
+            right1.Write(pinValueLow);
+            left2.Write(pinValueHigh);
+            right2.Write(pinValueHigh);
+        }
+
+        private void carReverse()
+        {
+            defaultPins();
+            leftE.Write(pinValueHigh);
+            rightE.Write(pinValueHigh);
+            left1.Write(pinValueHigh);
+            right1.Write(pinValueHigh);
+            left2.Write(pinValueLow);
+            right2.Write(pinValueLow);
+        }
+
+        private void carRight()
+        {
+            defaultPins();
+            leftE.Write(pinValueHigh);
+            rightE.Write(pinValueHigh);
+            left1.Write(pinValueLow);
+            right1.Write(pinValueHigh);
+            left2.Write(pinValueHigh);
+            right2.Write(pinValueLow);
+        }
+        private void carLeft()
+        {
+            defaultPins();
+            leftE.Write(pinValueHigh);
+            rightE.Write(pinValueHigh);
+            left1.Write(pinValueHigh);
+            right1.Write(pinValueLow);
+            left2.Write(pinValueLow);
+            right2.Write(pinValueHigh);
+        }
+
+
+        private void carStop()
+        {
+            defaultPins();
+        }
+        #endregion  
+        
+        private void Window_KeyDown(CoreWindow sender, KeyEventArgs e)
+        {
+            Debug.WriteLine(e.VirtualKey);
+            if (e.VirtualKey == Windows.System.VirtualKey.Up || e.VirtualKey == Windows.System.VirtualKey.W)
+            {
+                carForward();
+            }
+
+            else if (e.VirtualKey == Windows.System.VirtualKey.Down || e.VirtualKey == Windows.System.VirtualKey.S)
+            {
+                carReverse();
+            }
+
+            else if (e.VirtualKey == Windows.System.VirtualKey.X)
+            {
+                carStop();
+            }
+
+            else if (e.VirtualKey == Windows.System.VirtualKey.Left || e.VirtualKey == Windows.System.VirtualKey.A)
+            {
+                carLeft();
+            }
+
+            else if (e.VirtualKey == Windows.System.VirtualKey.Right || e.VirtualKey == Windows.System.VirtualKey.D)
+            {
+                carRight();
+            }
+        }
+        private void Window_KeyUp(CoreWindow sender, KeyEventArgs e)
+        {
+            Debug.WriteLine(e.VirtualKey);
+            if (
+                e.VirtualKey == Windows.System.VirtualKey.Up || 
+                e.VirtualKey == Windows.System.VirtualKey.W ||
+                e.VirtualKey == Windows.System.VirtualKey.Down || 
+                e.VirtualKey == Windows.System.VirtualKey.S ||
+                e.VirtualKey == Windows.System.VirtualKey.Left || 
+                e.VirtualKey == Windows.System.VirtualKey.A ||
+                e.VirtualKey == Windows.System.VirtualKey.Right || 
+                e.VirtualKey == Windows.System.VirtualKey.D ||
+                e.VirtualKey == Windows.System.VirtualKey.X
+                )
+            {
+                carStop();
+            }
+        }
+}
